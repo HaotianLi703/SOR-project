@@ -1,9 +1,12 @@
 import data_processers as dp
 import numpy 
+import torch    # 如正常则静默
+from torch.backends import cudnn # 如正常则静默
 
 def train_hawkes():
-    
-    # 读取数据
+
+    # 读取和预处理数据
+    print('Reading and processing data for training vanilla hawkes process...')
     data_process = dp.DataProcesser(
         {
         'path_rawdata': 'data/data_retweet/', 
@@ -13,6 +16,18 @@ def train_hawkes():
             'partial_predict': 0
         }
     )
+
+    # compile the model
+
+    # define the loss function
+
+    # define the optimizer
+
+    # train the model
+
+    for epoch in range(100):
+        print('Epoch %d' % epoch)
+        pass
 
 if __name__ == '__main__':
     train_hawkes()
