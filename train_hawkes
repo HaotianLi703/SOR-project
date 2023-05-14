@@ -1,0 +1,18 @@
+import data_processers as dp
+import numpy 
+
+def train_hawkes():
+    
+    # 读取数据
+    data_process = dp.DataProcesser(
+        {
+        'path_rawdata': 'data/data_retweet/', 
+            'size_batch': 10, 
+            'ratio_train':numpy.float32(1.0),
+            'to_read': ['train', 'dev'],
+            'partial_predict': 0
+        }
+    )
+
+if __name__ == '__main__':
+    train_hawkes()
