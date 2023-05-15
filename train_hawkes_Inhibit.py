@@ -4,6 +4,7 @@ import torch
 from torch.backends import cudnn 
 import model_hawkes
 
+
 def train_hawkes():
 
     # 读取和预处理数据
@@ -19,12 +20,12 @@ def train_hawkes():
 
     # compile the model
     model = model_hawkes.Hawks_Inhibit(type_num=3)
-    # define the loss function
 
     # define the optimizer
-
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
     # train the model
-    max_step = 1
+    max_step = 50
     epo = 1
     for epoch in range(epo):
         print('Epoch %d' % epoch)
@@ -48,9 +49,40 @@ def train_hawkes():
                 data_process.seq_sims_mask_numpy
             ]
 
+            # 转换为tensor
+            for index in range(len(input_list)):
+                input_list[index] = torch.from_numpy(input_list[index])
+
+            # 传输到GPU
+            if torch.cuda.is_available():
+                model = model.cuda()
+                for i in range(len(input_list)):
+                    input_list[i] = input_list[i].cuda()
+
             out = model.forward(input_list)
 
-            print(1)
+            # 计算loss, 即-log-likelihood
+            loss = my_loss_function(out[0])
+
+            # 清空梯度
+            optimizer.zero_grad()
+
+
+            # 反向传播
+            loss.backward()
+
+            print('loss为  ' + str(loss.item()))
+
+            # 更新参数
+            optimizer.step()
+
+            
+
+def my_loss_function(x):
+    """
+    自定义损失函数，传入的是-log-likelihood
+    """
+    return x
 
 if __name__ == '__main__':
     train_hawkes()

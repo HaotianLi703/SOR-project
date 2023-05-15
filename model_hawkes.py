@@ -2,6 +2,8 @@ import torch
 import numpy
 import os
 
+from torch._C import ParameterDict
+
 class Hawkes(torch.nn.Module):
     def __init__(self):
         pass
@@ -16,7 +18,34 @@ class Hawks_Inhibit:
         self.alpha = torch.rand((type_num, type_num), requires_grad=True)
         self.delta = torch.rand((type_num, type_num), requires_grad=True)
         self.__parameters = dict(mu=self.mu, alpha=self.alpha, delta=self.delta)
+        # True代表已经把参数传至GPU
         self.___gpu = False
+    
+    def cuda(self):
+        if not self.___gpu:
+            # 将参数传到GPU
+            self.mu = self.mu.cuda().detach().requires_grad_(True)
+            self.alpha = self.alpha.cuda().detach().requires_grad_(True)
+            self.delta = self.delta.cuda().detach().requires_grad_(True)
+            self.__parameters = dict(mu=self.mu, alpha=self.alpha, delta=self.delta)
+            # True代表已经把参数传至GPU
+            self.___gpu = True
+        return self
+    
+    def cpu(self):
+        if self.___gpu:
+            # 将参数传到CPU
+            self.mu = self.mu.cpu().detach().requires_grad_(True)
+            self.alpha = self.alpha.cpu().detach().requires_grad_(True)
+            self.delta = self.delta.cpu().detach().requires_grad_(True)
+            self.__parameters = dict(mu=self.mu, alpha=self.alpha, delta=self.delta)
+            # False代表已经把参数传至CPU
+            self.___gpu = False
+        return self
+    
+    def parameters(self):
+        for name, para in self.__parameters.items():
+            yield para
 
     def forward(self, input_list):
         '''
@@ -37,9 +66,6 @@ class Hawks_Inhibit:
         seq_sims_mask : N * size_batch -- 1/0
         '''
 
-        for index in range(len(input_list)):
-            input_list[index] = torch.from_numpy(input_list[index])
-
         [seq_time_to_current_numpy, 
         seq_type_event_numpy, 
         time_since_start_to_end_numpy,
@@ -50,8 +76,8 @@ class Hawks_Inhibit:
         seq_sims_mask_to_current_numpy,
         seq_sims_mask_numpy] = input_list
         
-        alpha_over_seq = self.alpha[:, seq_type_event_numpy.detach().numpy()]
-        delta_over_seq = self.delta[:, seq_type_event_numpy.detach().numpy()]
+        alpha_over_seq = self.alpha[:, seq_type_event_numpy.detach().cpu().numpy()]
+        delta_over_seq = self.delta[:, seq_type_event_numpy.detach().cpu().numpy()]
 
         lambda_over_seq_sims_tilde = self.mu[:,None,None] + torch.sum(
             (
@@ -133,7 +159,7 @@ class Hawks_Inhibit:
             )
         )[
             torch.arange(new_shape_0),
-            seq_type_event_numpy.flatten().detach().numpy()
+            seq_type_event_numpy.flatten().detach().cpu().numpy()
         ].reshape(
             (back_shape_0, back_shape_1)
         )
