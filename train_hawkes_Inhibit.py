@@ -32,6 +32,10 @@ def train_hawkes():
     # compile the model
     model = model_hawkes.Hawks_Inhibit(type_num=3)
 
+    # model传输到GPU
+    if torch.cuda.is_available():
+        model = model.cuda()
+
     # define the optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
@@ -69,7 +73,6 @@ def train_hawkes():
 
             # 传输到GPU
             if torch.cuda.is_available():
-                model = model.cuda()
                 for i in range(len(input_list)):
                     input_list[i] = input_list[i].cuda()
 

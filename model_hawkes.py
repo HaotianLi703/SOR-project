@@ -13,14 +13,23 @@ class Hawkes(torch.nn.Module):
 
 class Hawks_Inhibit:
     def __init__(self, type_num):
-        # 定义参数
-        self.mu = torch.rand((type_num, ), requires_grad=True)
-        self.alpha = torch.rand((type_num, type_num), requires_grad=True)
-        self.delta = torch.rand((type_num, type_num), requires_grad=True)
+        # 定义参数 
+        self.mu = torch.rand((type_num, ), requires_grad=True) * 2 - 1 
+        # 把tensor mu转换到[-1,1]区间
+        # self.mu = self.mu * 2 - 1
+        self.alpha = torch.rand((type_num, type_num), requires_grad=True) *2 - 1
+        # 把tensor alpha转换到[-1,1]区间
+        # self.alpha = self.alpha * 2 - 1
+        self.delta = torch.rand((type_num, type_num), requires_grad=True) * 10 +10
+        # 把tensor delta转换到[10,20]区间
+        # self.delta = self.delta * 10 + 10
+
         self.__parameters = dict(mu=self.mu, alpha=self.alpha, delta=self.delta)
         # True代表已经把参数传至GPU
         self.___gpu = False
     
+
+
     def cuda(self):
         if not self.___gpu:
             # 将参数传到GPU
