@@ -201,6 +201,6 @@ class Hawks_Inhibit:
         log_likelihood_seq = log_likelihood_seq_batch
         log_likelihood_type = log_likelihood_type_batch
         log_likelihood_time = log_likelihood_time_batch
+        num_of_events = torch.sum(seq_mask_numpy)
 
-
-        return cost_to_optimize, log_likelihood_seq, log_likelihood_type, log_likelihood_time
+        return cost_to_optimize, log_likelihood_seq, log_likelihood_type, log_likelihood_time, num_of_events
