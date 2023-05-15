@@ -36,7 +36,7 @@ def train_hawkes():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
     # train the model
-    epo = 1
+    epo = 5
     for epoch in range(epo):
         print('Epoch %d' % epoch)
 
@@ -89,6 +89,9 @@ def train_hawkes():
 
             # 更新参数
             optimizer.step()
+
+            # 限制delta的范围大于0
+            model.delta.data = torch.clamp(model.delta.data, min=0.0)
 
             # 记录当前batch的数量
             my_log['iteration'] += 1
