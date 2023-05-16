@@ -40,7 +40,7 @@ def train_hawkes():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
     # train the model
-    epo = 5
+    epo = 50
     for epoch in range(epo):
         print('Epoch %d' % epoch)
 
@@ -104,13 +104,13 @@ def train_hawkes():
                 print('Validating,....')
                 # 记录所有的log-likelihood的加和
                 total_loglik_val = 0
-                # 记录validation中事件的数量
+                # 记录validation中事件的数量;``
                 total_event_val = 0
 
                 for val_step in range(data_process.max_nums['dev']):
                     # multiple和predict_first的值是什么意思？pending check
                     data_process.process_data(
-                            tag_batch = 'dev',
+                            tag_batch = 'dev    ',
                             idx_batch_current = val_step,
                             tag_model = 'hawkesinhib',
                             multiple = numpy.int32(10),
@@ -131,7 +131,7 @@ def train_hawkes():
 
                     # 传输到GPU
                     if torch.cuda.is_available():
-                        model = model.cuda()
+                        # model = model.cuda()
                         for i in range(len(input_list_val)):
                             input_list_val[i] = input_list_val[i].cuda()
 
@@ -146,7 +146,7 @@ def train_hawkes():
                     total_event_val += out_val[-1].item()
                     assert total_event_val > 0, '事件的数量不应该小于0'
                     
-                    if val_step % 10 == 9:
+                    if val_step % 50 == 0:
                         print('已经验证了' + str(val_step) + '个batch，总共有' + str(data_process.max_nums['dev']) + '个batch')
                 
                 # 记录当前validation的平均log-likelihood
@@ -156,11 +156,9 @@ def train_hawkes():
                 if my_log['val_tracking']['val_log_lik'][-1] > my_log['best_log_lik_val']:
                     print('发现了更好的模型，其log-likelihood为'+str(my_log['val_tracking']['val_log_lik'][-1]) +'之前最好的为'+ str(my_log['best_log_lik_val']))
                     my_log['best_log_lik_val'] = my_log['val_tracking']['val_log_lik'][-1]
-                    torch.save(model, 'model_hawkesinhib')
+                    torch.save(model, 'model_hawkesinhib.pkl')
                     
                     print('保存了模型')
-
-
 
 
 
