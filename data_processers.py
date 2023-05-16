@@ -19,8 +19,6 @@ from collections import defaultdict
 from theano.tensor.shared_randomstreams import RandomStreams
 import struct
 
-import utils
-
 
 dtype=theano.config.floatX
 
