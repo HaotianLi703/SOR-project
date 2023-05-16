@@ -10,17 +10,17 @@ data processers
 import pickle
 import time
 import numpy
-import theano
-from theano import sandbox
-import theano.tensor as tensor
+# import theano
+# from theano import sandbox
+# import theano.tensor as tensor
 import os
 #import scipy.io
 from collections import defaultdict
-from theano.tensor.shared_randomstreams import RandomStreams
+# from theano.tensor.shared_randomstreams import RandomStreams
 import struct
 
 
-dtype=theano.config.floatX
+dtype='float64'
 
 class DataProcesser(object):
     '''
