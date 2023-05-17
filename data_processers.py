@@ -20,7 +20,7 @@ from collections import defaultdict
 import struct
 
 
-dtype='float64'
+dtype ='float64'
 
 class DataProcesser(object):
     '''
@@ -418,7 +418,8 @@ class DataProcesser(object):
             self.seq_sims_mask_numpy[
                 :num_sims_this_seq, idx_in_batch
             ] = numpy.float32(1.0)
-            #
+
+            # 在一条sequence中做采样
             sampled_times = numpy.sort(
                 numpy.random.uniform(
                     low = 0.0,

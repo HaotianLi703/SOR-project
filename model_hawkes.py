@@ -87,7 +87,8 @@ class Hawks_Inhibit:
         
         alpha_over_seq = self.alpha[:, seq_type_event_numpy.detach().cpu().numpy()]
         delta_over_seq = self.delta[:, seq_type_event_numpy.detach().cpu().numpy()]
-
+        
+        # sims代表从U~(0,T)中采样的序列，在计算积分是使用
         lambda_over_seq_sims_tilde = self.mu[:,None,None] + torch.sum(
             (
                 seq_sims_mask_to_current_numpy[None,:,:,:] * (
@@ -121,7 +122,7 @@ class Hawks_Inhibit:
         ) * time_since_start_to_end_numpy / num_sims_start_to_end_numpy
         # (size_batch, )
         term_2 = numpy.float32(0.0)
-        #
+        # 
         '''
         for this model, the computation of term_3 follows the same procedure of term_1, since we need to estimate lambda(s_j), i.e, we need large N * T * size_batch tensors for (1) time to current; (2) mask for (1).
         then we can just follow the steps of term_1 to finish the integral estimation.
@@ -130,6 +131,8 @@ class Hawks_Inhibit:
         # then we compute the 1st term, which is the trickest
         # we use seq_time_to_current : T * T * size_batch
         # seq_mask_to_current : T * T * size_batch
+
+        # 计算的是各个事件发生时刻的lambda_tilde
         lambda_over_seq_tilde = self.mu[:, None, None] + torch.sum(
             (
                 seq_mask_to_current_numpy[None,:,:,:]
@@ -142,24 +145,31 @@ class Hawks_Inhibit:
             )
             , axis=2
         ) # dim_process * T * size_batch
-        #
+
+        # soft relu
         lambda_over_seq = torch.log(
             numpy.float32(1.0) + torch.exp(
                 lambda_over_seq_tilde
             )
         ) # dim_process * T * size_batch
-        #
+        # 
         lambda_sum_over_seq = torch.sum(
             lambda_over_seq, axis=0
         ) # T * size_batch
         # now we choose the right lambda for each step
         # by using seq_type_event : T * size_batch
+
+        # we first reshape it to (T*size_batch, )
         new_shape_0 = lambda_over_seq.shape[1]*lambda_over_seq.shape[2]
+        # dim_process
         new_shape_1 = lambda_over_seq.shape[0]
-        #
+        # T
         back_shape_0 = lambda_over_seq.shape[1]
+        # size_batch
         back_shape_1 = lambda_over_seq.shape[2]
-        #
+        '''
+        先reshape到T * size_batch * dim_process，然后reshape到(T*size_batch) , dim_process，然后根据seq_type_event的值，选取各个时间发生时刻对应的lambda
+        ''' 
         lambda_target_over_seq = lambda_over_seq.permute(
             (1,2,0)
         ).reshape(
