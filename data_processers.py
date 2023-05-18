@@ -99,6 +99,7 @@ class DataProcesser(object):
         }
         #
         # decide if we only predict partial stream
+        # 如果是partial predict，那么只predict event-0
         self.partial_predict = settings['partial_predict']
         self.substream = [0]
         '''
@@ -365,6 +366,7 @@ class DataProcesser(object):
                 #
                 if self.partial_predict:
                     if item_event['type_event'] not in self.substream:
+                        # 在partial predict的setting下把其他type的event的mask设为0
                         self.seq_mask_numpy[idx_pos, idx_in_batch] = numpy.float32(0.0)
                 #
                 idx_pos_prime = 0
@@ -384,12 +386,14 @@ class DataProcesser(object):
                     idx_pos_prime += 1
                     #
         if not predict_first:
+            # 如果没有predict first则把第一个event的mask设为0
             self.seq_mask_numpy[0,:] = numpy.float32(0.0)
         #
         #
     #
     #
     def sample_times(self, multiple=numpy.int32(10) ):
+        # 对应原文integral estimation算法，take N>0 proportional to T个sample
         self.num_sims_start_to_end_numpy = numpy.float32(
             multiple * self.num_events_start_to_end_numpy
         )

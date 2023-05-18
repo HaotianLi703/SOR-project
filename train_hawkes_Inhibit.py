@@ -23,6 +23,7 @@ def train_hawkes():
     data_process = dp.DataProcesser(
         {        'path_rawdata': 'data/data_retweet/', 
             'size_batch': 10, 
+            # 使用的训练集的比例
             'ratio_train':numpy.float32(1.0),
             'to_read': ['train', 'dev'],
             'partial_predict': 0
@@ -53,7 +54,10 @@ def train_hawkes():
                 tag_batch = 'train',
                 idx_batch_current = step_train,
                 tag_model = 'hawkesinhib',
+                # 对应计算积分时N对T的乘数，最终一个sequence sample的数量为N = multiple * event_num
+                # 为了保证速度，在训练时用到的乘数为1，在测试和validation时的乘数为10 
                 multiple = numpy.int32(1),
+                # 如果没有predict first则把第一个event的mask设为0
                 predict_first = 1
             )
             input_list = [data_process.seq_time_to_current_numpy,
