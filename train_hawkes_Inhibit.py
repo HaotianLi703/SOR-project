@@ -5,7 +5,7 @@ from torch.backends import cudnn
 import model_hawkes
 
 
-def train_hawkes():
+def train_hawkes(train_ratio = 1, epo = 50):
     # 训练记录日志
     my_log = dict()
     # 原文中对应track_period，默认1000，为每隔若干个个batch做一次validation
@@ -24,7 +24,7 @@ def train_hawkes():
         {        'path_rawdata': 'data/data_retweet/', 
             'size_batch': 10, 
             # 使用的训练集的比例
-            'ratio_train':numpy.float32(1.0),
+            'ratio_train':numpy.float32(train_ratio),
             'to_read': ['train', 'dev'],
             'partial_predict': 0
         }
@@ -41,7 +41,7 @@ def train_hawkes():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
     # train the model
-    epo = 50
+  
     for epoch in range(epo):
         print('Epoch %d' % epoch)
 
@@ -114,7 +114,7 @@ def train_hawkes():
                 for val_step in range(data_process.max_nums['dev']):
                     # multiple和predict_first的值是什么意思？pending check
                     data_process.process_data(
-                            tag_batch = 'dev    ',
+                            tag_batch = 'dev',
                             idx_batch_current = val_step,
                             tag_model = 'hawkesinhib',
                             multiple = numpy.int32(10),
@@ -160,7 +160,7 @@ def train_hawkes():
                 if my_log['val_tracking']['val_log_lik'][-1] > my_log['best_log_lik_val']:
                     print('发现了更好的模型，其log-likelihood为'+str(my_log['val_tracking']['val_log_lik'][-1]) +'之前最好的为'+ str(my_log['best_log_lik_val']))
                     my_log['best_log_lik_val'] = my_log['val_tracking']['val_log_lik'][-1]
-                    torch.save(model, 'model_hawkesinhib.pkl')
+                    torch.save(model, 'model_hawkesinhib_20000.pkl')
                     
                     print('保存了模型')
 
@@ -174,4 +174,5 @@ def my_loss_function(x):
     return x
 
 if __name__ == '__main__':
-    train_hawkes()
+    # train_hawkes(train_ratio=0.00625 , epo=2000)
+    train_hawkes(train_ratio=1 , epo=200)
