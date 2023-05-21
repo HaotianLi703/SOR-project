@@ -2,10 +2,43 @@ import data_processers as dp
 import numpy 
 import torch    
 from torch.backends import cudnn 
-import model_hawkes
+import model_hawkes_inhibit
 
+import argparse
 
-def train_hawkes(train_ratio = 1, epo = 50):
+def train_hawkes():
+    
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-train_ratio', 
+        type=float, 
+        default=1.0, 
+        required=True,
+        help='训练集的比例,[0,1]')
+    parser.add_argument(
+        '-epo', 
+        type=int, 
+        default=50, 
+        required=True,
+        help='训练的轮数')
+
+    parser.add_argument( 
+        '-file_dir',
+        default = 'data/data_retweet/',
+        type = str,
+        required = True,
+        help = '数据集的路径，例如data/data_retweet/'
+    )
+
+    args = parser.parse_args()
+
+    assert args.train_ratio >= 0 and args.train_ratio <= 1, '训练集的比例应该在[0,1]之间'
+    assert args.epo > 0, '训练的轮数应该大于0'
+
+    train_ratio = args.train_ratio
+    epo = args.epo
+
     # 训练记录日志
     my_log = dict()
     # 原文中对应track_period，默认1000，为每隔若干个个batch做一次validation
@@ -21,7 +54,7 @@ def train_hawkes(train_ratio = 1, epo = 50):
     # 读取和预处理数据
     print('Reading and processing data for training inhibit hawkes process...')
     data_process = dp.DataProcesser(
-        {        'path_rawdata': 'data/data_retweet/', 
+        {        'path_rawdata': args.file_dir, 
             'size_batch': 10, 
             # 使用的训练集的比例
             'ratio_train':numpy.float32(train_ratio),
@@ -31,7 +64,7 @@ def train_hawkes(train_ratio = 1, epo = 50):
     )
 
     # compile the model
-    model = model_hawkes.Hawks_Inhibit(type_num=3)
+    model = model_hawkes_inhibit.Hawks_Inhibit(type_num=3)
 
     # model传输到GPU
     if torch.cuda.is_available():
@@ -160,13 +193,11 @@ def train_hawkes(train_ratio = 1, epo = 50):
                 if my_log['val_tracking']['val_log_lik'][-1] > my_log['best_log_lik_val']:
                     print('发现了更好的模型，其log-likelihood为'+str(my_log['val_tracking']['val_log_lik'][-1]) +'之前最好的为'+ str(my_log['best_log_lik_val']))
                     my_log['best_log_lik_val'] = my_log['val_tracking']['val_log_lik'][-1]
-                    torch.save(model, 'model_hawkesinhib_20000.pkl')
-                    
+                    torch.save(model, 'model_hawkesinhib_'+str(train_ratio)+'.pkl')
                     print('保存了模型')
 
 
 
-    
 def my_loss_function(x):
     """
     自定义损失函数，传入的是-log-likelihood
@@ -175,4 +206,4 @@ def my_loss_function(x):
 
 if __name__ == '__main__':
     # train_hawkes(train_ratio=0.00625 , epo=2000)
-    train_hawkes(train_ratio=1 , epo=200)
+    train_hawkes()

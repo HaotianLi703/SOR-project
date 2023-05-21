@@ -4,7 +4,7 @@ import torch
 import argparse
 
 
-def test_hawkes_inhibit():
+def test_hawkes():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -17,10 +17,10 @@ def test_hawkes_inhibit():
 
     parser.add_argument(
         '-model_dir',
-        default = 'model_hawkesinhib_1.pkl',
+        default = 'model_hawkes_1.pkl',
         type = str,
         required = True,
-        help = '模型的路径，例如model_hawkesinhib_1.pkl'
+        help = '模型的路径，例如model_hawkes_1.pkl'
     )
 
     args = parser.parse_args()
@@ -56,21 +56,18 @@ def test_hawkes_inhibit():
         data_process.process_data(
             tag_batch = 'test',
             idx_batch_current = step_test,
-            tag_model = 'hawkesinhib',
+            tag_model = 'hawkes',
             # multiple和predict_first的值是什么意思？pending check
             multiple = numpy.int32(10),
             predict_first = 1
         )
-        input_list_test = [data_process.seq_time_to_current_numpy,
-            data_process.seq_type_event_numpy,
-            data_process.time_since_start_to_end_numpy,
-            data_process.num_sims_start_to_end_numpy,
-            data_process.seq_mask_numpy,
-            data_process.seq_mask_to_current_numpy,
-            data_process.seq_sims_time_to_current_numpy,
-            data_process.seq_sims_mask_to_current_numpy,
-            data_process.seq_sims_mask_numpy
-        ]
+        input_list_test = [data_process.seq_time_to_end_numpy, 
+                            data_process.seq_time_to_current_numpy, 
+                            data_process.seq_type_event_numpy,
+                            data_process.time_since_start_to_end_numpy,
+                            data_process.seq_mask_numpy, 
+                            data_process.seq_mask_to_current_numpy 
+                            ]
 
         # 转换为tensor
         for index in range(len(input_list_test)):
@@ -95,4 +92,4 @@ def test_hawkes_inhibit():
 
 
 if __name__ == '__main__':
-    test_hawkes_inhibit()
+    test_hawkes()
