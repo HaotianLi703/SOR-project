@@ -1,0 +1,10 @@
+data/
+model/
+.vscode/
+__pycache__/
+*.txt
+*.sh
+log/
+error/
+.env/
+.DS_Store
